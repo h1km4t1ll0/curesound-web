@@ -17,5 +17,5 @@ services:
       context: ./backend
       dockerfile: ./Dockerfile
     ports:
-      - "8084:8080"
+      - "8084:8000"
     command: /app/entrypoint.sh
