@@ -69,16 +69,16 @@ async def handle_get_stress_index(request: web.Request):
 app = web.Application()
 handle_get_stress_index_route = app.router.add_post('/get-stress-index', handle_get_stress_index)
 
-# cors = aiohttp_cors.setup(app, defaults={
-#     "*": aiohttp_cors.ResourceOptions(
-#         allow_credentials=True,
-#         expose_headers="*",
-#         allow_headers="*",
-#         allow_methods="*",
-#     )
-# })
+cors = aiohttp_cors.setup(app, defaults={
+    "*": aiohttp_cors.ResourceOptions(
+        allow_credentials=True,
+        expose_headers="*",
+        allow_headers="*",
+        allow_methods="*",
+    )
+})
 
-# cors.add(handle_get_stress_index_route)
+cors.add(handle_get_stress_index_route)
 
 # if __name__ == '__main__':
 #     web.run_app(app, host='0.0.0.0', port=8080)
