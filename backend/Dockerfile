@@ -1,5 +1,5 @@
 # ---- Base python ----
-FROM python:3.11 AS base
+FROM python:3.10 AS base
 RUN apt-get update
 RUN mkdir /app
 WORKDIR /app
