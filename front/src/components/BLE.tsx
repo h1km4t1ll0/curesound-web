@@ -36,10 +36,10 @@ const BluetoothHeartRateMonitor = () => {
   const onGattServerDisconnected = useCallback(async () => {
     setIsIsSampling(false);
     elapsedTime.current = 0;
-    dataToSend.current = [];
     rawData.current = [];
     setData([]);
     await getStressIndex()
+    dataToSend.current = [];
   }, [getStressIndex]);
 
   const disconnectDevice = useCallback(async () => {
