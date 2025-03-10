@@ -9,7 +9,7 @@ type DataPoint = { timestamp: number; value: number };
 
 const HEART_RATE_UUID = "0000ffb1-0000-1000-8000-00805f9b34fb";
 const HEART_RATE_CHARACTERISTIC = "0000ffb2-0000-1000-8000-00805f9b34fb";
-
+const API_URL = import.meta.env.VITE_API_UR;
 
 const BluetoothHeartRateMonitor = () => {
   const [device, setDevice] = useState(null);
@@ -24,7 +24,7 @@ const BluetoothHeartRateMonitor = () => {
   const elapsedTime = useRef<number>(0);
 
   const getStressIndex = useCallback(async () => {
-    const stressIndexData = await axios.post(import.meta.env.VITE_API_URL, dataToSend.current);
+    const stressIndexData = await axios.post(API_URL, dataToSend.current);
     navigate(`/checkup-result/${stressIndexData.data?.stressIndex ?? -1}`);
   }, [navigate]);
 
