@@ -24,8 +24,13 @@ const BluetoothHeartRateMonitor = () => {
   const elapsedTime = useRef<number>(0);
 
   const getStressIndex = useCallback(async () => {
-    const stressIndexData = await axios.post(API_URL, dataToSend.current);
-    navigate(`/checkup-result/${stressIndexData.data?.stressIndex ?? -1}`);
+    try {
+      const stressIndexData = await axios.post(API_URL, dataToSend.current);
+      navigate(`/checkup-result/${stressIndexData.data?.stressIndex ?? -1}`);
+    } catch (e) {
+      console.error('debug data:', API_URL, dataToSend.current);
+      console.error(e);
+    }
   }, [navigate]);
 
   const onGattServerDisconnected = useCallback(async () => {
