@@ -2,3 +2,4 @@ aiohttp==3.11.13
 aiohttp-cors==0.7.0
 numpy==2.2.3
 scipy==1.15.2
+gunicorn==21.2.0
