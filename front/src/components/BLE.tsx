@@ -9,7 +9,7 @@ type DataPoint = { timestamp: number; value: number };
 
 const HEART_RATE_UUID = "0000ffb1-0000-1000-8000-00805f9b34fb";
 const HEART_RATE_CHARACTERISTIC = "0000ffb2-0000-1000-8000-00805f9b34fb";
-const API_URL = import.meta.env.VITE_API_UR;
+const API_URL = import.meta.env.VITE_API_URL;
 
 const BluetoothHeartRateMonitor = () => {
   const [device, setDevice] = useState(null);
