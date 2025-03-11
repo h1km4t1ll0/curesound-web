@@ -143,8 +143,8 @@ const BluetoothHeartRateMonitor = () => {
             }}>
               <LineChart data={data}>
                 <CartesianGrid strokeDasharray="3 3"/>
-                <XAxis dataKey="timestamp" tickFormatter={time => new Date(time).toLocaleTimeString()}/>
-                <YAxis/>
+                <XAxis dataKey="timestamp" tickFormatter={time => new Date(time).toLocaleTimeString()} tick={false}/>
+                <YAxis tick={false}/>
                 <Tooltip/>
                 <Line type="monotone" dataKey="value" stroke="#8884d8" dot={false}/>
               </LineChart>
