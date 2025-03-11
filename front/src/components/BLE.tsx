@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from "react";
-import {CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis} from "recharts";
+import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 
 import {processPacket} from "./utils.ts";
 import axios from "axios";
@@ -34,12 +34,12 @@ const BluetoothHeartRateMonitor = () => {
   }, [navigate]);
 
   const onGattServerDisconnected = useCallback(async () => {
+    // elapsedTime.current = 0;
+    // rawData.current = [];
+    // setData([]);
+    await getStressIndex();
     setIsIsSampling(false);
-    elapsedTime.current = 0;
-    rawData.current = [];
-    setData([]);
-    await getStressIndex()
-    dataToSend.current = [];
+    // dataToSend.current = [];
   }, [getStressIndex]);
 
   const disconnectDevice = useCallback(async () => {
@@ -82,7 +82,7 @@ const BluetoothHeartRateMonitor = () => {
     }
   }, [disconnectDevice, onGattServerDisconnected, isSampling]);
 
-  const handleCharacteristicValueChanged = (event: {target: {value: {buffer: ArrayBufferLike}}}) => {
+  const handleCharacteristicValueChanged = (event: { target: { value: { buffer: ArrayBufferLike } } }) => {
     const value = processPacket(new Uint8Array(event.target.value.buffer))?.[0];
     if (!value) {
       return
@@ -135,15 +135,20 @@ const BluetoothHeartRateMonitor = () => {
         isSampling && (
           <>
             <h2>Elapsed time: {elapsedTime.current}</h2>
-            <div>
-              <LineChart width={800} height={400} data={data}>
+            <ResponsiveContainer width="100%" height={300} style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '10px',
+            }}>
+              <LineChart data={data}>
                 <CartesianGrid strokeDasharray="3 3"/>
                 <XAxis dataKey="timestamp" tickFormatter={time => new Date(time).toLocaleTimeString()}/>
                 <YAxis/>
                 <Tooltip/>
                 <Line type="monotone" dataKey="value" stroke="#8884d8" dot={false}/>
               </LineChart>
-            </div>
+            </ResponsiveContainer>
           </>
         )
       }
