@@ -135,11 +135,11 @@ const BluetoothHeartRateMonitor = () => {
         isSampling && (
           <>
             <h2>Elapsed time: {elapsedTime.current}</h2>
-            <ResponsiveContainer width="100%" height={300} style={{
+            <ResponsiveContainer width="100%" height={400} style={{
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
-              padding: '10px',
+              marginLeft: '-5%',
             }}>
               <LineChart data={data}>
                 <CartesianGrid strokeDasharray="3 3"/>
