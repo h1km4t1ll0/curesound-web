@@ -37,6 +37,7 @@ const BluetoothHeartRateMonitor = () => {
   const handleCharacteristicValueChanged = useCallback((event: { target: { value: { buffer: ArrayBufferLike } } }) => {
     let value;
     let timeDelta;
+    console.log(device?.name, 'device?.name');
 
     if (device?.name?.toLocaleLowerCase()?.includes('std')) {
       value = processPacketSTD(new Uint8Array(event.target.value.buffer))?.[0];

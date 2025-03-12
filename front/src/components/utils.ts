@@ -13,6 +13,7 @@ export function processPacketUnPlus(data0: Uint8Array): [number[], number[], num
   if (data0.length !== 20) {
     throw new Error("Invalid packet length");
   }
+  console.log('processPacketUnPlus called');
 
   const data: number[] = Array.from(data0, byte => byte & 0xFF);
 
@@ -46,6 +47,7 @@ function getUnsignedValuesSTD(data: number[]): number {
 
 
 export function processPacketSTD(data0: Uint8Array): [number[], number[], number] | null {
+  console.log('processPacketSTD called');
   if (data0.length !== 20) {
     throw new Error("Invalid packet length");
   }
