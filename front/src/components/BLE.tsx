@@ -101,7 +101,7 @@ const BluetoothHeartRateMonitor = () => {
     let value;
     let timeDelta;
 
-    if (device?.name?.includes('STD')) {
+    if (device?.name?.toLocaleLowerCase()?.includes('std')) {
       value = processPacketSTD(new Uint8Array(event.target.value.buffer))?.[0];
       timeDelta = 5;
     } else {
