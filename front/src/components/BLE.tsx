@@ -44,6 +44,7 @@ const BluetoothHeartRateMonitor = () => {
     }
     // rawData.current = [];
     // setData([]);
+    // dataToSend.current = [];
     await getStressIndex();
 
     // const totalLength = veryRawData.current.reduce((sum, arr) => sum + arr.length, 0);
@@ -57,7 +58,6 @@ const BluetoothHeartRateMonitor = () => {
     //
     // saveBinaryFile(result, 'data.bin')
     setIsIsSampling(false);
-    // dataToSend.current = [];
   }, [device, getStressIndex]);
 
   const disconnectDevice = useCallback(async () => {
@@ -141,14 +141,17 @@ const BluetoothHeartRateMonitor = () => {
 
   useEffect(() => {
     if (isSampling) {
-      const interval = setInterval(() => {
+      const interval = setInterval(async () => {
+        if (elapsedTime.current > 180) {
+          await onGattServerDisconnected();
+        }
         elapsedTime.current += 1;
         rawData.current = rawData.current.slice(-1000);
       }, 1000);
 
       return () => clearInterval(interval);
     }
-  }, [isSampling]);
+  }, [isSampling, onGattServerDisconnected]);
 
   return (
     <div>
