@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 
-import {processPacket, saveBinaryFile} from "./utils.ts";
+import { processPacketSTD, processPacketUnPlus } from "./utils.ts";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
@@ -12,7 +12,7 @@ const HEART_RATE_CHARACTERISTIC = "0000ffb2-0000-1000-8000-00805f9b34fb";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const BluetoothHeartRateMonitor = () => {
-  const [device, setDevice] = useState(null);
+  const [device, setDevice] = useState<{name?: string} | null>(null);
   const [isSampling, setIsIsSampling] = useState<boolean>(false);
   const [data, setData] = useState<DataPoint[]>([]);
 
@@ -22,7 +22,7 @@ const BluetoothHeartRateMonitor = () => {
   const dataToSend = useRef<DataPoint[]>([]);
   const curTimestamp = useRef<number>(Date.now());
   const elapsedTime = useRef<number>(0);
-  const veryRawData = useRef<Uint8Array[]>([]);
+  // const veryRawData = useRef<Uint8Array[]>([]);
 
   const getStressIndex = useCallback(async () => {
     try {
@@ -46,26 +46,23 @@ const BluetoothHeartRateMonitor = () => {
     // setData([]);
     await getStressIndex();
 
-    const totalLength = veryRawData.current.reduce((sum, arr) => sum + arr.length, 0);
-    const result = new Uint8Array(totalLength);
-
-    let offset = 0;
-    for (const arr of veryRawData.current) {
-      result.set(arr, offset);
-      offset += arr.length;
-    }
-
-    saveBinaryFile(result, 'data.bin')
+    // const totalLength = veryRawData.current.reduce((sum, arr) => sum + arr.length, 0);
+    // const result = new Uint8Array(totalLength);
+    //
+    // let offset = 0;
+    // for (const arr of veryRawData.current) {
+    //   result.set(arr, offset);
+    //   offset += arr.length;
+    // }
+    //
+    // saveBinaryFile(result, 'data.bin')
     setIsIsSampling(false);
     // dataToSend.current = [];
   }, [device, getStressIndex]);
 
   const disconnectDevice = useCallback(async () => {
     if (device) {
-
-      // await device.gatt.disconnect();
       await onGattServerDisconnected();
-      // @ts-expect-error TS2339
       console.log('Disconnected from', device.name);
     }
   }, [device, onGattServerDisconnected]);
@@ -98,24 +95,33 @@ const BluetoothHeartRateMonitor = () => {
         console.error('Connection failed', err);
       }
     }
-  }, [disconnectDevice, onGattServerDisconnected, isSampling]);
+  }, [isSampling, disconnectDevice, onGattServerDisconnected]);
 
   const handleCharacteristicValueChanged = (event: { target: { value: { buffer: ArrayBufferLike } } }) => {
-    veryRawData.current.push(new Uint8Array(event.target.value.buffer));
-    const value = processPacket(new Uint8Array(event.target.value.buffer))?.[0];
+    let value;
+    let timeDelta;
+
+    if (device?.name?.includes('STD')) {
+      value = processPacketSTD(new Uint8Array(event.target.value.buffer))?.[0];
+      timeDelta = 5;
+    } else {
+      value = processPacketUnPlus(new Uint8Array(event.target.value.buffer))?.[0];
+      timeDelta = 2.5
+    }
+
     if (!value) {
       return
     }
 
     dataToSend.current = [...dataToSend.current, ...value.map((e) => {
-      curTimestamp.current += 2.5;
+      curTimestamp.current += timeDelta;
       return {
         timestamp: curTimestamp.current,
         value: e,
       }
     })];
     rawData.current = [...rawData.current, ...value.map((e) => {
-      curTimestamp.current += 2.5;
+      curTimestamp.current += timeDelta;
       return {
         timestamp: curTimestamp.current,
         value: e,
