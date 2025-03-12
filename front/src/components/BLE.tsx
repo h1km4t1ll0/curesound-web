@@ -22,6 +22,7 @@ const BluetoothHeartRateMonitor = () => {
   const dataToSend = useRef<DataPoint[]>([]);
   const curTimestamp = useRef<number>(Date.now());
   const elapsedTime = useRef<number>(0);
+  const deviceName = useRef<string>('');
   // const veryRawData = useRef<Uint8Array[]>([]);
 
   const getStressIndex = useCallback(async () => {
@@ -37,9 +38,9 @@ const BluetoothHeartRateMonitor = () => {
   const handleCharacteristicValueChanged = useCallback((event: { target: { value: { buffer: ArrayBufferLike } } }) => {
     let value;
     let timeDelta;
-    console.log(device?.name, 'device?.name', 'cond:', device?.name?.toLocaleLowerCase()?.includes('std'));
+    console.log(deviceName.current, 'device?.name', 'cond:', deviceName.current?.toLocaleLowerCase()?.includes('std'));
 
-    if (device?.name?.toLocaleLowerCase()?.includes('std')) {
+    if (deviceName.current?.toLocaleLowerCase()?.includes('std')) {
       value = processPacketSTD(new Uint8Array(event.target.value.buffer))?.[0];
       timeDelta = 5;
     } else {
@@ -113,6 +114,7 @@ const BluetoothHeartRateMonitor = () => {
         // await device.gatt.disconnect();
         const server = await requestedDevice.gatt.connect();
         setDevice(requestedDevice);
+        deviceName.current = requestedDevice.name;
         console.log('Connected to', requestedDevice.name);
 
         const service = await server.getPrimaryService(HEART_RATE_UUID);
