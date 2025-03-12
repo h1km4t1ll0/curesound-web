@@ -36,8 +36,12 @@ const BluetoothHeartRateMonitor = () => {
 
   const onGattServerDisconnected = useCallback(async () => {
     // elapsedTime.current = 0;
-    // @ts-expect-error TS2339
-    await device.gatt.disconnect();
+    try {
+      // @ts-expect-error TS2339
+      await device.gatt.disconnect();
+    } catch (e) {
+      console.error(e);
+    }
     // rawData.current = [];
     // setData([]);
     await getStressIndex();
