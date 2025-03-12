@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 
-import {processPacket} from "./utils.ts";
+import {processPacket, saveBinaryFile} from "./utils.ts";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
@@ -22,6 +22,7 @@ const BluetoothHeartRateMonitor = () => {
   const dataToSend = useRef<DataPoint[]>([]);
   const curTimestamp = useRef<number>(Date.now());
   const elapsedTime = useRef<number>(0);
+  const veryRawData = useRef<Uint8Array[]>([]);
 
   const getStressIndex = useCallback(async () => {
     try {
@@ -35,17 +36,30 @@ const BluetoothHeartRateMonitor = () => {
 
   const onGattServerDisconnected = useCallback(async () => {
     // elapsedTime.current = 0;
+    // @ts-expect-error TS2339
+    await device.gatt.disconnect();
     // rawData.current = [];
     // setData([]);
     await getStressIndex();
+
+    const totalLength = veryRawData.current.reduce((sum, arr) => sum + arr.length, 0);
+    const result = new Uint8Array(totalLength);
+
+    let offset = 0;
+    for (const arr of veryRawData.current) {
+      result.set(arr, offset);
+      offset += arr.length;
+    }
+
+    saveBinaryFile(result, 'data.bin')
     setIsIsSampling(false);
     // dataToSend.current = [];
-  }, [getStressIndex]);
+  }, [device, getStressIndex]);
 
   const disconnectDevice = useCallback(async () => {
     if (device) {
-      // @ts-expect-error TS2339
-      await device.gatt.disconnect();
+
+      // await device.gatt.disconnect();
       await onGattServerDisconnected();
       // @ts-expect-error TS2339
       console.log('Disconnected from', device.name);
@@ -62,7 +76,7 @@ const BluetoothHeartRateMonitor = () => {
           filters: [{namePrefix: 'We',}],
           optionalServices: [HEART_RATE_CHARACTERISTIC, HEART_RATE_UUID]
         });
-
+        // await device.gatt.disconnect();
         const server = await device.gatt.connect();
         setDevice(device);
         console.log('Connected to', device.name);
@@ -83,6 +97,7 @@ const BluetoothHeartRateMonitor = () => {
   }, [disconnectDevice, onGattServerDisconnected, isSampling]);
 
   const handleCharacteristicValueChanged = (event: { target: { value: { buffer: ArrayBufferLike } } }) => {
+    veryRawData.current.push(new Uint8Array(event.target.value.buffer));
     const value = processPacket(new Uint8Array(event.target.value.buffer))?.[0];
     if (!value) {
       return

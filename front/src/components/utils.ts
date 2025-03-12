@@ -35,3 +35,22 @@ export function processPacket(data0: Uint8Array): [number[], number[], number] |
     return [signed, [], (data[0] & 0x70) >> 4];
   }
 }
+
+export function saveBinaryFile(data: Uint8Array, filename: string) {
+  // Create a Blob from the binary data
+  const blob = new Blob([data], { type: "application/octet-stream" });
+
+  // Create a URL for the Blob
+  const url = URL.createObjectURL(blob);
+
+  // Create a hidden anchor element and trigger the download
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+
+  // Cleanup
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
