@@ -34,6 +34,38 @@ const BluetoothHeartRateMonitor = () => {
     }
   }, [navigate]);
 
+  const handleCharacteristicValueChanged = useCallback((event: { target: { value: { buffer: ArrayBufferLike } } }) => {
+    let value;
+    let timeDelta;
+
+    if (device?.name?.toLocaleLowerCase()?.includes('std')) {
+      value = processPacketSTD(new Uint8Array(event.target.value.buffer))?.[0];
+      timeDelta = 5;
+    } else {
+      value = processPacketUnPlus(new Uint8Array(event.target.value.buffer))?.[0];
+      timeDelta = 2.5
+    }
+
+    if (!value) {
+      return
+    }
+
+    dataToSend.current = [...dataToSend.current, ...value.map((e) => {
+      curTimestamp.current += timeDelta;
+      return {
+        timestamp: curTimestamp.current,
+        value: e,
+      }
+    })];
+    rawData.current = [...rawData.current, ...value.map((e) => {
+      curTimestamp.current += timeDelta;
+      return {
+        timestamp: curTimestamp.current,
+        value: e,
+      }
+    })];
+  }, [device?.name]);
+
   const onGattServerDisconnected = useCallback(async () => {
     // elapsedTime.current = 0;
     try {
@@ -95,39 +127,7 @@ const BluetoothHeartRateMonitor = () => {
         console.error('Connection failed', err);
       }
     }
-  }, [isSampling, disconnectDevice, onGattServerDisconnected]);
-
-  const handleCharacteristicValueChanged = (event: { target: { value: { buffer: ArrayBufferLike } } }) => {
-    let value;
-    let timeDelta;
-
-    if (device?.name?.toLocaleLowerCase()?.includes('std')) {
-      value = processPacketSTD(new Uint8Array(event.target.value.buffer))?.[0];
-      timeDelta = 5;
-    } else {
-      value = processPacketUnPlus(new Uint8Array(event.target.value.buffer))?.[0];
-      timeDelta = 2.5
-    }
-
-    if (!value) {
-      return
-    }
-
-    dataToSend.current = [...dataToSend.current, ...value.map((e) => {
-      curTimestamp.current += timeDelta;
-      return {
-        timestamp: curTimestamp.current,
-        value: e,
-      }
-    })];
-    rawData.current = [...rawData.current, ...value.map((e) => {
-      curTimestamp.current += timeDelta;
-      return {
-        timestamp: curTimestamp.current,
-        value: e,
-      }
-    })];
-  };
+  }, [isSampling, disconnectDevice, handleCharacteristicValueChanged, onGattServerDisconnected]);
 
   useEffect(() => {
     if (isSampling) {
