@@ -106,21 +106,21 @@ const BluetoothHeartRateMonitor = () => {
     } else {
       try {
         // @ts-expect-error TS2339
-        const device = await navigator.bluetooth.requestDevice({
+        const requestedDevice = await navigator.bluetooth.requestDevice({
           filters: [{namePrefix: 'We',}],
           optionalServices: [HEART_RATE_CHARACTERISTIC, HEART_RATE_UUID]
         });
         // await device.gatt.disconnect();
-        const server = await device.gatt.connect();
-        setDevice(device);
-        console.log('Connected to', device.name);
+        const server = await requestedDevice.gatt.connect();
+        setDevice(requestedDevice);
+        console.log('Connected to', requestedDevice.name);
 
         const service = await server.getPrimaryService(HEART_RATE_UUID);
         const characteristic = await service.getCharacteristic(HEART_RATE_CHARACTERISTIC);
 
         await characteristic.startNotifications();
         characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
-        device.addEventListener("gattserverdisconnected", onGattServerDisconnected);
+        requestedDevice.addEventListener("gattserverdisconnected", onGattServerDisconnected);
 
         console.log('Listening for heart rate notifications...');
         setIsIsSampling(true)
